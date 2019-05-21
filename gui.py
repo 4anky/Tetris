@@ -8,18 +8,21 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(600, 941)
-        MainWindow.setMinimumSize(QtCore.QSize(600, 941))
-        MainWindow.setMaximumSize(QtCore.QSize(600, 941))
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+class Ui_Tetris(object):
+    def setupUi(self, Tetris):
+        Tetris.setObjectName("Tetris")
+        Tetris.resize(600, 941)
+        Tetris.setMinimumSize(QtCore.QSize(600, 941))
+        Tetris.setMaximumSize(QtCore.QSize(600, 941))
+        self.centralwidget = QtWidgets.QWidget(Tetris)
         self.centralwidget.setMinimumSize(QtCore.QSize(600, 900))
         self.centralwidget.setMaximumSize(QtCore.QSize(600, 900))
         self.centralwidget.setObjectName("centralwidget")
         self.view_cup = QtWidgets.QGraphicsView(self.centralwidget)
         self.view_cup.setGeometry(QtCore.QRect(20, 30, 400, 800))
+        self.view_cup.setAcceptDrops(True)
+        self.view_cup.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.view_cup.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.view_cup.setObjectName("view_cup")
         self.view_nextitem = QtWidgets.QGraphicsView(self.centralwidget)
         self.view_nextitem.setGeometry(QtCore.QRect(460, 30, 100, 100))
@@ -50,22 +53,22 @@ class Ui_MainWindow(object):
         self.lbl_score_2.setFont(font)
         self.lbl_score_2.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.lbl_score_2.setObjectName("lbl_score_2")
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        Tetris.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(Tetris)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 600, 21))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        Tetris.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(Tetris)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        Tetris.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(Tetris)
+        QtCore.QMetaObject.connectSlotsByName(Tetris)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, Tetris):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.btn_newgame.setText(_translate("MainWindow", "New Game"))
-        self.lbl_score.setText(_translate("MainWindow", "Score"))
-        self.lbl_score_2.setText(_translate("MainWindow", "Next"))
+        Tetris.setWindowTitle(_translate("Tetris", "Tetris"))
+        self.btn_newgame.setText(_translate("Tetris", "New Game"))
+        self.lbl_score.setText(_translate("Tetris", "Score"))
+        self.lbl_score_2.setText(_translate("Tetris", "Next"))
 
