@@ -65,5 +65,6 @@ fig_choice = {'1': i_fig(),
               '6': l_fig(),
               '7': j_fig()}
 
-print(fig_choice['2'])
+a = [1, 4, 7]
+print(sum(a))
 
