@@ -13,16 +13,17 @@ import gui
 
 class Figures:
     def __init__(self):
-        self.point = [5, 0]
+        self.point = [5, 1]
         self.color = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0), QColor(0, 0, 255),
                       QColor(255, 255, 0), QColor(255, 0, 255), QColor(255, 128, 0), QColor(128, 64, 0)]
-        self.vectors_collection = {1: [[0, 1], [0, 2], [0, 3]],
-                                   2: [[-1, 1], [0, 1], [1, 1]],
-                                   3: [[-1, 0], [-1, 1], [0, 1]],
-                                   4: [[-1, 0], [0, 1], [1, 1]],
-                                   5: [[1, 0], [0, 1], [-1, 1]],
-                                   6: [[0, 1], [0, 2], [1, 2]],
-                                   7: [[0, 1], [0, 2], [-1, 2]]}
+        self.vectors_collection = {1: [[0, -1], [0, 1], [0, 2]],
+                                   2: [[0, -1], [-1, 0], [1, 0]],
+                                   3: [[0, -1], [0, 1], [1, 1]],
+                                   4: [[0, -1], [0, 1], [-1, 1]],
+                                   5: [[0, -1], [1, -1], [-1, 0]],
+                                   6: [[0, -1], [-1, -1], [1, 0]],
+                                   7: [[0, -1], [-1, -1], [-1, 0]]}
+        self.matrix_rotate = np.array(([0, -1], [1, 0]), dtype=int)
 
     @staticmethod
     def fig(vect, point):
@@ -123,6 +124,9 @@ class Main(QMainWindow):
         else:
             return False
 
+    def check_rotate(self):
+        pass
+
 
     def update_scene(self):
         self.scene.clear()
@@ -163,6 +167,9 @@ class Main(QMainWindow):
         for i in range(1, 5):
             self.cup_set(self.tetramino[i], self.num)
 
+    def rotate(self):
+        pass
+
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_S and self.check_down():
@@ -177,6 +184,10 @@ class Main(QMainWindow):
             self.shift_right()
             self.update_scene()
 
+        if event.key() == Qt.Key_W and self.check_rotate():
+            self.rotate()
+            self.update_scene()
+
     def game_on(self):
         self.matrix = np.zeros((20, 10), dtype=int)
         self.timer_id = self.startTimer(100, timerType=Qt.PreciseTimer)
@@ -184,13 +195,15 @@ class Main(QMainWindow):
     def timerEvent(self, event):
         if self.new_tetramino_flag:
             self.num = random.randint(1, 7)
-            self.tetramino = self.figures.fig(self.figures.vectors_collection[self.num], [5, 0])
+            self.tetramino = self.figures.fig(self.figures.vectors_collection[self.num], [5, 1])
 
             if not sum([self.cup_get(self.tetramino[i]) for i in range(1, 5)]):
                 [self.cup_set(i, self.num) for i in self.tetramino[1:5]]
                 self.update_scene()
                 self.new_tetramino_flag = False
             else:
+                self.killTimer(self.timer_id)
+                self.timer_id = 0
                 print('GAME OVER!!!')
 
         if self.check_down():
