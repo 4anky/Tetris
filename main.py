@@ -16,13 +16,13 @@ class Figures:
         self.point = [5, 1]
         self.color = [QColor(255, 255, 255), QColor(255, 0, 0), QColor(0, 255, 0), QColor(0, 0, 255),
                       QColor(255, 255, 0), QColor(255, 0, 255), QColor(255, 128, 0), QColor(128, 64, 0)]
-        self.vectors_collection = {1: [[0, -1], [0, 1], [0, 2]],
-                                   2: [[0, -1], [-1, 0], [1, 0]],
-                                   3: [[0, -1], [0, 1], [1, 1]],
-                                   4: [[0, -1], [0, 1], [-1, 1]],
-                                   5: [[0, -1], [1, -1], [-1, 0]],
-                                   6: [[0, -1], [-1, -1], [1, 0]],
-                                   7: [[0, -1], [-1, -1], [-1, 0]]}
+        self.vectors = {1: [[0, -1], [0, 1], [0, 2]],
+                        2: [[0, -1], [-1, 0], [1, 0]],
+                        3: [[0, -1], [0, 1], [1, 1]],
+                        4: [[0, -1], [0, 1], [-1, 1]],
+                        5: [[0, -1], [1, -1], [-1, 0]],
+                        6: [[0, -1], [-1, -1], [1, 0]],
+                        7: [[0, -1], [-1, -1], [-1, 0]]}
         self.matrix_rotate = np.array(([0, -1], [1, 0]), dtype=int)
 
     @staticmethod
@@ -59,7 +59,7 @@ class Main(QMainWindow):
 
 
     def check_down(self):
-        self.down_y = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        self.down_y = 10 * [-1]
         self.under_down_y = []
 
         for i in range(1, 5):
@@ -81,7 +81,7 @@ class Main(QMainWindow):
             return False
 
     def check_left(self):
-        self.left_x = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+        self.left_x = 20 * [10]
         self.left_left_x = []
 
         for i in range(1, 5):
@@ -103,7 +103,7 @@ class Main(QMainWindow):
             return False
 
     def check_right(self):
-        self.right_x = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+        self.right_x = 20 * [-1]
         self.right_right_x = []
 
         for i in range(1, 5):
@@ -125,7 +125,15 @@ class Main(QMainWindow):
             return False
 
     def check_rotate(self):
-        pass
+        self.vect_rotate = [np.ndarray.tolist(np.dot(self.figures.matrix_rotate, np.array(self.tetramino[0][i]))) for i in range(3)]
+        self.tetramino_rotate = self.figures.fig(self.vect_rotate, self.tetramino[1])
+
+        self.rotate_points = [self.cup_get(self.tetramino[i]) for i in range(2, 5)]
+        if not sum(self.rotate_points):
+            return
+
+        print(self.tetramino[0])
+        print(self.vect_rotate)
 
 
     def update_scene(self):
@@ -195,7 +203,7 @@ class Main(QMainWindow):
     def timerEvent(self, event):
         if self.new_tetramino_flag:
             self.num = random.randint(1, 7)
-            self.tetramino = self.figures.fig(self.figures.vectors_collection[self.num], [5, 1])
+            self.tetramino = self.figures.fig(self.figures.vectors[self.num], [5, 1])
 
             if not sum([self.cup_get(self.tetramino[i]) for i in range(1, 5)]):
                 [self.cup_set(i, self.num) for i in self.tetramino[1:5]]
