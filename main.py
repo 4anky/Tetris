@@ -1,12 +1,10 @@
 import sys
 import random
 
-
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsScene
+from PyQt5.QtWidgets import QMainWindow, QApplication, QGraphicsScene
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt
 import numpy as np
-
 
 import gui
 
@@ -23,26 +21,27 @@ class Figures:
                         5: [[0, -1], [1, -1], [-1, 0]],
                         6: [[0, -1], [-1, -1], [1, 0]],
                         7: [[0, -1], [-1, -1], [-1, 0]]}
-        self.matrix_rotate = np.array(([0, -1], [1, 0]), dtype=int)
+        self.matrix_turn = np.array(([0, -1], [1, 0]), dtype=int)
 
     @staticmethod
-    def fig(vect, point):
-        return vect,\
-               point,\
+    def figure(vect, point):
+        return vect, \
+               point, \
                [point[0] + vect[0][0], point[1] + vect[0][1]], \
                [point[0] + vect[1][0], point[1] + vect[1][1]], \
                [point[0] + vect[2][0], point[1] + vect[2][1]]
 
+
 class Main(QMainWindow):
     def __init__(self):
-        super(Main, self).__init__(parent=None)
+        super(Main, self).__init__()
 
         self.ui = gui.Ui_Tetris()
         self.ui.setupUi(self)
-        self.figures = Figures()
+        self.fig = Figures()
 
         self.score = 0
-        self.matrix = 0
+        self.matrix = np.array(0)
         self.new_tetramino_flag = True
 
         self.scene = QGraphicsScene(0, 0, 400, 800)
@@ -56,7 +55,6 @@ class Main(QMainWindow):
 
     def cup_get(self, point):
         return self.matrix[point[1]][point[0]]
-
 
     def check_down(self):
         self.down_y = 10 * [-1]
@@ -124,32 +122,48 @@ class Main(QMainWindow):
         else:
             return False
 
-    def check_rotate(self):
-        self.vect_rotate = [np.ndarray.tolist(np.dot(self.figures.matrix_rotate, np.array(self.tetramino[0][i]))) for i in range(3)]
-        self.tetramino_rotate = self.figures.fig(self.vect_rotate, self.tetramino[1])
+    def check_turn(self):
+        if self.num == 7:
+            return False
 
-        self.rotate_points = [self.cup_get(self.tetramino[i]) for i in range(2, 5)]
-        if not sum(self.rotate_points):
-            return
+        self.vect_turn = [np.ndarray.tolist(np.dot(self.fig.matrix_turn, np.array(self.tetramino[0][i]))) for i in
+                          range(3)]
+        self.tetramino_turn = self.fig.figure(self.vect_turn, self.tetramino[1])
 
-        print(self.tetramino[0])
-        print(self.vect_rotate)
+        self.turn_points = []
+        for i in self.tetramino_turn[2:5]:
+            if i in self.tetramino[2:5]:
+                self.turn_points.append(0)
+                continue
+            if i[0] in range(10) and i[1] in range(20):
+                self.turn_points.append(self.cup_get(i))
+            else:
+                return False
 
+        if not sum(self.turn_points):
+            return True
+        else:
+            return False
 
     def update_scene(self):
         self.scene.clear()
         for i in range(10):
             for j in range(20):
-                self.scene.addRect(40 * i, 40 * j, 40, 40, self.figures.color[0], self.figures.color[self.matrix[j][i]])
+                self.scene.addRect(40 * i, 40 * j, 40, 40, self.fig.color[0], self.fig.color[self.matrix[j][i]])
 
-    def score_and_delete_line(self):
+    def score_and_delete_lines(self):
+        self.index_full_lines = []
+
         for i in range(20):
-            if not (0 in self.matrix[i]):
-                self.matrix[i] = np.zeros((1, 10), dtype=int)
-                self.matrix[0:i+1] = np.roll(self.matrix[0:i+1], 1, axis=0)
-                self.score += 100
-        self.ui.text_score.setText(str(self.score))
+            if not 0 in self.matrix[i]:
+                self.index_full_lines.append(i)
 
+        for i in self.index_full_lines:
+            self.matrix[i] = np.zeros((1, 10), dtype=int)
+            self.matrix[0:i + 1] = np.roll(self.matrix[0:i + 1], 1, axis=0)
+
+        self.score += 100 * (2 ** len(self.index_full_lines)) - 100
+        self.ui.text_score.setText(str(self.score))
 
     def shift_down(self):
         for i in range(1, 5):
@@ -175,9 +189,13 @@ class Main(QMainWindow):
         for i in range(1, 5):
             self.cup_set(self.tetramino[i], self.num)
 
-    def rotate(self):
-        pass
+    def turn(self):
+        for i in range(1, 5):
+            self.cup_set(self.tetramino[i], 0)
 
+        self.tetramino = self.tetramino_turn
+        for i in range(1, 5):
+            self.cup_set(self.tetramino[i], self.num)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_S and self.check_down():
@@ -192,18 +210,21 @@ class Main(QMainWindow):
             self.shift_right()
             self.update_scene()
 
-        if event.key() == Qt.Key_W and self.check_rotate():
-            self.rotate()
+        if event.key() == Qt.Key_W and self.check_turn():
+            self.turn()
             self.update_scene()
-
     def game_on(self):
+        self.score = 0
+        self.ui.text_score.setText(str(self.score))
+
         self.matrix = np.zeros((20, 10), dtype=int)
-        self.timer_id = self.startTimer(100, timerType=Qt.PreciseTimer)
+        self.timer_id = self.startTimer(300, timerType=Qt.PreciseTimer)
+        self.ui.btn_newgame.setEnabled(False)
 
     def timerEvent(self, event):
         if self.new_tetramino_flag:
             self.num = random.randint(1, 7)
-            self.tetramino = self.figures.fig(self.figures.vectors[self.num], [5, 1])
+            self.tetramino = self.fig.figure(self.fig.vectors[self.num], [5, 1])
 
             if not sum([self.cup_get(self.tetramino[i]) for i in range(1, 5)]):
                 [self.cup_set(i, self.num) for i in self.tetramino[1:5]]
@@ -212,15 +233,17 @@ class Main(QMainWindow):
             else:
                 self.killTimer(self.timer_id)
                 self.timer_id = 0
-                print('GAME OVER!!!')
+#                print('GAME OVER!!!')
+                self.ui.btn_newgame.setEnabled(True)
 
         if self.check_down():
             self.shift_down()
             self.update_scene()
         else:
             self.new_tetramino_flag = True
-            self.score_and_delete_line()
+            self.score_and_delete_lines()
             self.update_scene()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
