@@ -145,26 +145,6 @@ class Main(QMainWindow):
         else:
             return False
 
-    def update_scene(self):
-        self.scene.clear()
-        for i in range(10):
-            for j in range(20):
-                self.scene.addRect(40 * i, 40 * j, 40, 40, self.fig.color[0], self.fig.color[self.matrix[j][i]])
-
-    def score_and_delete_lines(self):
-        self.index_full_lines = []
-
-        for i in range(20):
-            if not 0 in self.matrix[i]:
-                self.index_full_lines.append(i)
-
-        for i in self.index_full_lines:
-            self.matrix[i] = np.zeros((1, 10), dtype=int)
-            self.matrix[0:i + 1] = np.roll(self.matrix[0:i + 1], 1, axis=0)
-
-        self.score += 100 * (2 ** len(self.index_full_lines)) - 100
-        self.ui.text_score.setText(str(self.score))
-
     def shift_down(self):
         for i in range(1, 5):
             self.cup_set(self.tetramino[i], 0)
@@ -213,9 +193,26 @@ class Main(QMainWindow):
         if event.key() == Qt.Key_W and self.check_turn():
             self.turn()
             self.update_scene()
+
+    def update_scene(self):
+        self.scene.clear()
+        for i in range(10):
+            for j in range(20):
+                self.scene.addRect(40 * i, 40 * j, 40, 40, self.fig.color[0], self.fig.color[self.matrix[j][i]])
+
+    def score_and_delete_lines(self):
+        self.index_full_lines = [i for i in range(20) if not 0 in self.matrix[i]]
+
+        for i in self.index_full_lines:
+            self.matrix[i] = np.zeros((1, 10), dtype=int)
+            self.matrix[0:i + 1] = np.roll(self.matrix[0:i + 1], 1, axis=0)
+
+        self.score += 100 * 2 ** len(self.index_full_lines) - 100
+        self.ui.text_score.setText(str(self.score))
+
     def game_on(self):
         self.score = 0
-        self.ui.text_score.setText(str(self.score))
+        self.ui.text_score.setText(str(0))
 
         self.matrix = np.zeros((20, 10), dtype=int)
         self.timer_id = self.startTimer(300, timerType=Qt.PreciseTimer)
